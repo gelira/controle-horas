@@ -16,21 +16,17 @@ class WorkingTime(Document):
 
     @classmethod
     def handle_times_changes(cls, sender, document, **kwargs):
-        document.calculate_worked_minutes()
-        document.format_worked_time()
-
-    def calculate_worked_minutes(self):
         try:
-            start_time_dt = datetime.strptime(self.start_time, '%H:%M')
+            start_time_dt = datetime.strptime(document.start_time, '%H:%M')
         except:
-            self.start_time = ''
-            self.end_time = ''
+            document.start_time = ''
+            document.end_time = ''
             start_time_dt = None
 
         try:
-            end_time_dt = datetime.strptime(self.end_time, '%H:%M')
+            end_time_dt = datetime.strptime(document.end_time, '%H:%M')
         except:
-            self.end_time = ''
+            document.end_time = ''
             end_time_dt = None
 
         if start_time_dt and end_time_dt:
@@ -41,12 +37,11 @@ class WorkingTime(Document):
         if worked_minutes < 0:
             worked_minutes += 60 * 60 * 24
 
-        self.worked_minutes = worked_minutes
+        document.worked_minutes = worked_minutes
 
-    def format_worked_time(self):
-        hours = self.worked_minutes // 60
-        minutes = self.worked_minutes % 60
+        hours = worked_minutes // 60
+        minutes = worked_minutes % 60
 
-        self.worked_time = f'{hours:02}:{minutes:02}'
+        document.worked_time = f'{hours:02}:{minutes:02}'
 
 signals.pre_save.connect(WorkingTime.handle_times_changes, sender=WorkingTime)
