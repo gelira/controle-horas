@@ -8,9 +8,11 @@ https://docs.djangoproject.com/en/4.1/howto/deployment/wsgi/
 """
 
 import os
-
+import dotenv
+from pathlib import Path
 from django.core.wsgi import get_wsgi_application
 
+dotenv.read_dotenv(Path(__file__).parent.parent / '.env')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 application = get_wsgi_application()
