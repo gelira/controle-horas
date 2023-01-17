@@ -15,7 +15,7 @@ class WorkingTime(Document):
     marked = fields.BooleanField(default=False)
 
     @classmethod
-    def pre_save(cls, sender, document, **kwargs):
+    def handle_times_changes(cls, sender, document, **kwargs):
         document.calculate_worked_minutes()
         document.format_worked_time()
 
@@ -49,4 +49,4 @@ class WorkingTime(Document):
 
         self.worked_time = f'{hours:02}:{minutes:02}'
 
-signals.pre_save.connect(WorkingTime.pre_save, sender=WorkingTime)
+signals.pre_save.connect(WorkingTime.handle_times_changes, sender=WorkingTime)
