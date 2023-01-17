@@ -14,6 +14,11 @@ class WorkingTime(Document):
     worked_minutes = fields.IntField(default=0)
     marked = fields.BooleanField(default=False)
 
+    @classmethod
+    def pre_save(cls, sender, document, **kwargs):
+        document.calculate_worked_minutes()
+        document.format_worked_time()
+
     def calculate_worked_minutes(self):
         try:
             start_time_dt = datetime.strptime(self.start_time, '%H:%M')
@@ -44,8 +49,4 @@ class WorkingTime(Document):
 
         self.worked_time = f'{hours:02}:{minutes:02}'
 
-def _pre_save_working_time(_, document, **kwargs):
-    document.calculate_worked_minutes()
-    document.format_worked_time()
-
-signals.pre_save.connect(_pre_save_working_time, sender=WorkingTime)
+signals.pre_save.connect(WorkingTime.pre_save, sender=WorkingTime)
