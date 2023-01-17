@@ -3,6 +3,7 @@ from datetime import datetime
 
 class WorkingDate(Document):
     date = fields.StringField()
+    total_worked_time = fields.StringField()
     total_worked_minutes = fields.IntField(default=0)
 
 class WorkingTime(Document):
@@ -44,4 +45,21 @@ class WorkingTime(Document):
 
         document.worked_time = f'{hours:02}:{minutes:02}'
 
+    @classmethod
+    def handle_working_time_change(cls, sender, document, **kwargs):
+        working_date = document.working_date
+
+        if not working_date:
+            return
+
+        total_worked_minutes = cls.objects(working_date=working_date).sum('worked_minutes')
+
+        hours = total_worked_minutes // 60
+        minutes = total_worked_minutes % 60
+
+        working_date.total_worked_time = f'{hours:02}:{minutes:02}'
+        working_date.total_worked_minutes = total_worked_minutes
+        working_date.save()
+
 signals.pre_save.connect(WorkingTime.handle_times_changes, sender=WorkingTime)
+signals.post_save.connect(WorkingTime.handle_working_time_change, sender=WorkingTime)
