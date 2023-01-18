@@ -1,6 +1,8 @@
 from mongoengine import Document, fields, signals
 from datetime import datetime
 
+from .utils import format_minutes
+
 class WorkingDate(Document):
     date = fields.StringField()
     total_worked_time = fields.StringField()
@@ -49,11 +51,7 @@ class WorkingTime(Document):
             worked_minutes += 60 * 60 * 24
 
         document.worked_minutes = worked_minutes
-
-        hours = worked_minutes // 60
-        minutes = worked_minutes % 60
-
-        document.worked_time = f'{hours:02}:{minutes:02}'
+        document.worked_time = format_minutes(worked_minutes)
 
     @classmethod
     def handle_working_time_change(cls, sender, document, **kwargs):
@@ -64,10 +62,7 @@ class WorkingTime(Document):
 
         total_worked_minutes = cls.objects(working_date=working_date).sum('worked_minutes')
 
-        hours = total_worked_minutes // 60
-        minutes = total_worked_minutes % 60
-
-        working_date.total_worked_time = f'{hours:02}:{minutes:02}'
+        working_date.total_worked_time = format_minutes(total_worked_minutes)
         working_date.total_worked_minutes = total_worked_minutes
         working_date.save()
 
