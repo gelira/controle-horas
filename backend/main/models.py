@@ -1,7 +1,6 @@
 from mongoengine import Document, fields, signals
-from datetime import datetime
 
-from .utils import format_minutes
+from .utils import format_minutes, parse_time
 
 class WorkingDate(Document):
     date = fields.StringField()
@@ -29,23 +28,18 @@ class WorkingTime(Document):
 
     @classmethod
     def handle_times_changes(cls, sender, document, **kwargs):
-        try:
-            start_time_dt = datetime.strptime(document.start_time, '%H:%M')
-        except:
-            document.start_time = ''
-            document.end_time = ''
-            start_time_dt = None
-
-        try:
-            end_time_dt = datetime.strptime(document.end_time, '%H:%M')
-        except:
-            document.end_time = ''
-            end_time_dt = None
+        start_time_dt = parse_time(document.start_time)
+        end_time_dt = parse_time(document.end_time)
 
         if start_time_dt and end_time_dt:
             worked_minutes = (end_time_dt - start_time_dt).seconds // 60
+        
         else:
             worked_minutes = 0
+            document.end_time = ''
+
+            if not start_time_dt:
+                document.start_time = ''
 
         if worked_minutes < 0:
             worked_minutes += 60 * 60 * 24
