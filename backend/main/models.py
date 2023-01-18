@@ -6,6 +6,16 @@ class WorkingDate(Document):
     total_worked_time = fields.StringField()
     total_worked_minutes = fields.IntField(default=0)
 
+    @classmethod
+    def get_or_create(cls, date):
+        d = cls.objects(date=date).first()
+
+        if not d:
+            d = cls(date=date)
+            d.save()
+
+        return d
+
 class WorkingTime(Document):
     working_date = fields.ReferenceField(WorkingDate)
     description = fields.StringField(default='')
