@@ -62,3 +62,4 @@ class WorkingTime(Document):
 
 signals.pre_save.connect(WorkingTime.handle_times_changes, sender=WorkingTime)
 signals.post_save.connect(WorkingTime.handle_working_time_change, sender=WorkingTime)
+signals.post_delete.connect(WorkingTime.handle_working_time_change, sender=WorkingTime)
