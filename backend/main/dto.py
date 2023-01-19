@@ -1,22 +1,18 @@
 from ninja import Schema
 from pydantic import validator
-from datetime import datetime
 
-from .utils import parse_time
+from .utils import parse_time, validate_date
+
+class WorkingDateQuery(Schema):
+    date: str
+    _validate_date = validator('date', allow_reuse=True)(validate_date)
 
 class CreateWorkingTimeDTO(Schema):
     date: str
     description: str = None
     start_time: str = None
     end_time: str = None
-
-    @validator('date')
-    def validate_date(cls, value):
-        try:
-            return datetime.strptime(value, '%Y-%m-%d') \
-                .strftime('%Y-%m-%d')
-        except:
-            raise ValueError('date must be in YYYY-MM-DD format')
+    _validate_date = validator('date', allow_reuse=True)(validate_date)
 
     @validator('start_time', 'end_time')
     def validate_times(cls, value):

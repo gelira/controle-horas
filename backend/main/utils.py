@@ -11,3 +11,9 @@ def parse_time(time):
         return datetime.strptime(time, '%H:%M')
     except:
         return None
+
+def validate_date(value):
+    try:
+        return datetime.strptime(value, '%Y-%m-%d').strftime('%Y-%m-%d')
+    except:
+        raise ValueError('date must be in YYYY-MM-DD format')
