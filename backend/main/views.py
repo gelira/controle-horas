@@ -9,12 +9,13 @@ api = NinjaAPI()
 @api.get('/working-time', response=dto.WorkingDateOutDTO)
 def list_working_time(request, query: dto.WorkingDateQuery = Query(...)):
     wd = WorkingDate.get_or_create(query.date)
-    qs = WorkingTime.objects(working_date=wd).order_by('start_time')
+    qs_with_st = WorkingTime.objects(working_date=wd, start_time__ne='').order_by('start_time')
+    qs_without_st = WorkingTime.objects(working_date=wd, start_time='')
 
     return {
         'date': wd.date,
         'total_worked_time': wd.total_worked_time,
-        'working_times': list(qs),
+        'working_times': list(qs_with_st) + list(qs_without_st),
     }
 
 @api.post('/working-time', response=dto.WorkingTimeOutDTO)
