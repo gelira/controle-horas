@@ -1,7 +1,17 @@
 from ninja import Schema
 from pydantic import validator
+from bson.objectid import ObjectId
 
 from .utils import parse_time, validate_date
+
+class WorkingTimeQuery(Schema):
+    id: str
+
+    @validator('id')
+    def validate_id(cls, value):
+        if not ObjectId.is_valid(value):
+            raise ValueError('invalid id')
+        return value
 
 class WorkingDateQuery(Schema):
     date: str
