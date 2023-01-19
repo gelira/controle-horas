@@ -20,9 +20,18 @@ class CreateWorkingTimeDTO(Schema):
         return dt and dt.strftime('%H:%M')
 
 class WorkingTimeOutDTO(Schema):
-    _id: str
+    id: str
     description: str
     start_time: str
     end_time: str
     worked_time: str
     marked: bool
+
+    @validator('id', pre=True)
+    def parse_id(cls, value):
+        return str(value)
+
+class WorkingDateOutDTO(Schema):
+    date: str
+    total_worked_time: str
+    working_times: list[WorkingTimeOutDTO]
