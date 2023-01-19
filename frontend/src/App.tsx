@@ -1,9 +1,9 @@
-import React from 'react'
+import WorkingClock from './pages/WorkingClock'
 
 function App() {
   return (
     <div>
-      <h1>Hello World</h1>
+      <WorkingClock />
     </div>
   )
 }
