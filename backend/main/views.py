@@ -1,7 +1,9 @@
 from ninja import NinjaAPI, Query
+from ninja.errors import HttpError
 
 from .models import WorkingDate, WorkingTime
 from .dto import (
+    WorkingTimeQuery,
     WorkingDateQuery,
     CreateWorkingTimeDTO, 
     WorkingTimeOutDTO,
@@ -24,7 +26,6 @@ def list_working_time(request, query: WorkingDateQuery = Query(...)):
 @api.post('/working-time', response=WorkingTimeOutDTO)
 def create_working_time(request, payload: CreateWorkingTimeDTO):
     wd = WorkingDate.get_or_create(payload.date)
-
     wt = WorkingTime(working_date=wd)
 
     for key, value in payload.dict().items():
@@ -34,3 +35,14 @@ def create_working_time(request, payload: CreateWorkingTimeDTO):
     wt.save()
 
     return wt
+
+@api.delete('/working-time', response={204: None})
+def delete_working_time(request, query: WorkingTimeQuery = Query(...)):
+    wt = WorkingTime.objects(id=query.id).first()
+
+    if not wt:
+        raise HttpError(404, 'working time not found')
+
+    wt.delete()
+
+    return 204, None
