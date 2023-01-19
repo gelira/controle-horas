@@ -17,17 +17,19 @@ class WorkingDateQuery(Schema):
     date: str
     _validate_date = validator('date', allow_reuse=True)(validate_date)
 
-class CreateWorkingTimeDTO(Schema):
-    date: str
+class UpdateWorkingTimeDTO(Schema):
     description: str = None
     start_time: str = None
     end_time: str = None
-    _validate_date = validator('date', allow_reuse=True)(validate_date)
 
     @validator('start_time', 'end_time')
     def validate_times(cls, value):
         dt = parse_time(value)
         return dt and dt.strftime('%H:%M')
+
+class CreateWorkingTimeDTO(UpdateWorkingTimeDTO):
+    date: str
+    _validate_date = validator('date', allow_reuse=True)(validate_date)
 
 class WorkingTimeOutDTO(Schema):
     id: str
