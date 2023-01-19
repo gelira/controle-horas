@@ -9,13 +9,22 @@ class WorkingDate(Document):
 
     @classmethod
     def get_or_create(cls, date):
-        d = cls.objects(date=date).first()
+        wd = cls.objects(date=date).first()
 
-        if not d:
-            d = cls(date=date)
-            d.save()
+        if not wd:
+            wd = cls(date=date)
+            wd.save()
 
-        return d
+        return wd
+
+    @classmethod
+    def handle_pre_save(cls, sender, document, **kwargs):
+        total_worked_minutes = document.total_worked_minutes
+
+        if not total_worked_minutes:
+            total_worked_minutes = 0
+
+        document.total_worked_time = format_minutes(total_worked_minutes)
 
 class WorkingTime(Document):
     working_date = fields.ReferenceField(WorkingDate)
@@ -54,12 +63,10 @@ class WorkingTime(Document):
         if not working_date:
             return
 
-        total_worked_minutes = cls.objects(working_date=working_date).sum('worked_minutes')
-
-        working_date.total_worked_time = format_minutes(total_worked_minutes)
-        working_date.total_worked_minutes = total_worked_minutes
+        working_date.total_worked_minutes = cls.objects(working_date=working_date).sum('worked_minutes')
         working_date.save()
 
+signals.pre_save.connect(WorkingDate.handle_pre_save, sender=WorkingDate)
 signals.pre_save.connect(WorkingTime.handle_times_changes, sender=WorkingTime)
 signals.post_save.connect(WorkingTime.handle_working_time_change, sender=WorkingTime)
 signals.post_delete.connect(WorkingTime.handle_working_time_change, sender=WorkingTime)
